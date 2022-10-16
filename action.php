@@ -53,6 +53,7 @@ if(isset($_POST["action"]))
  if($_POST["action"] == "fetch")
  {
   $folder = array_filter(glob('*'), 'is_dir');
+  
   usort($folder, function($x, $y) {
     return filemtime($x) < filemtime($y);
  });
@@ -146,7 +147,10 @@ if(isset($_POST["action"]))
  if($_POST["action"] == "fetch_files")
  {
   $file_data = scandir($_POST["folder_name"]);
-  $output = '
+  $output = '<form action="merge.php">
+  <input type="hidden" name="folderName" value="'.$_POST['folder_name'].'"/>
+  <button type="submit">Merge All File</button>
+  </form>
   <table class="table table-bordered table-striped">
    <tr>
     <th>Date Upload</th>
