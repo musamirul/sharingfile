@@ -49,6 +49,8 @@
    <div class="modal-body">
     <p>Enter Folder Name
     <input type="text" name="folder_name" id="folder_name" class="form-control" /></p>
+    <p>Enter Date Expiry
+    <input type="date" id="folder_date" name="folder_date" class="form-control"></p>
     <br />
     <input type="hidden" name="action" id="action" />
     <input type="hidden" name="old_name" id="old_name" />
@@ -123,6 +125,7 @@ $(document).ready(function(){
  $(document).on('click', '#create_folder', function(){
   $('#action').val("create");
   $('#folder_name').val('');
+  $('#folder_date').val('');
   $('#folder_button').val('Create');
   $('#folderModal').modal('show');
   $('#old_name').val('');
@@ -131,6 +134,7 @@ $(document).ready(function(){
  
  $(document).on('click', '#folder_button', function(){
   var folder_name = $('#folder_name').val();
+  var folder_date = $('#folder_date').val();
   var old_name = $('#old_name').val();
   var action = $('#action').val();
   if(folder_name != '')
@@ -138,7 +142,7 @@ $(document).ready(function(){
    $.ajax({
     url:"action.php",
     method:"POST",
-    data:{folder_name:folder_name, old_name:old_name, action:action},
+    data:{folder_name:folder_name, folder_date:folder_date, old_name:old_name, action:action},
     success:function(data)
     {
      $('#folderModal').modal('hide');

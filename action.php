@@ -1,4 +1,6 @@
+
 <?php
+include("config.php");
 date_default_timezone_set("Asia/Kuala_Lumpur");
 function format_folder_size($size)
 {
@@ -58,12 +60,13 @@ if(isset($_POST["action"]))
     return filemtime($x) < filemtime($y);
  });
   $output = '<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search Folder.." title="Type in a name">
-  <table id="myTable" class="table table-bordered table-striped">
+  <table id="myTable" class="table table-bordered table-hover">
    <tr>
     <th>Folder Name</th>
     <th>Total File</th>
     <th>Size</th>
     <th>Date Modified</th>
+    <th>Date Expiry</th>
     <th>Update</th>
     <th>Delete</th>
     <th>Upload File</th>
@@ -74,15 +77,39 @@ if(isset($_POST["action"]))
   {
    foreach($folder as $name)
    {
+    $Select_Folder = mysqli_query($con,"SELECT * FROM docfolder WHERE doc_name = '$name'");
+    $num_rows = mysqli_num_rows($Select_Folder);
+    $ResultFolder = "";
+    if($num_rows>0){
+        $Result_Folder = mysqli_fetch_array($Select_Folder);
+        $ResultFolder = $Result_Folder['doc_date'];
+        
+        
+    }else{
+        $ResultFolder = "";
+    }
+    $time = date("Y-m-d");
+    $colorTR = "";
+    $disabledTr = "";
+    //if($time == $Result_Folder['doc_date']){ echo "test"; };
+    if($time >= $Result_Folder['doc_date']){ 
+        $colorTR = "class='bg-danger'"; 
+        $disabledTr = "disabled";
+    };
+   
+   
+    
+    
     $output .= '
-     <tr>
+     <tr '.$colorTR.'>
       <td>'.$name.'</td>
       <td>'.(count(scandir($name)) - 2).'</td>
       <td>'.get_folder_size($name).'</td>
       <td>'.@date('F d, Y, H:i:s', filemtime($name)).'</td>
-      <td><button type="button" name="update" data-name="'.$name.'" class="update btn btn-warning btn-xs">Update</button></td>
+      <td>'.$ResultFolder.'</td>
+      <td><button type="button" name="update" data-name="'.$name.'" class="update btn btn-warning btn-xs" '.$disabledTr.'>Update</button></td>
       <td><button type="button" name="delete" data-name="'.$name.'" class="delete btn btn-danger btn-xs">Delete</button></td>
-      <td><button type="button" name="upload" data-name="'.$name.'" class="upload btn btn-info btn-xs">Upload File</button></td>
+      <td><button type="button" name="upload" data-name="'.$name.'" class="upload btn btn-info btn-xs" '.$disabledTr.'>Upload File</button></td>
       <td><button type="button" name="view_files" data-name="'.$name.'" class="view_files btn btn-default btn-xs">View Files</button></td>
      </tr>';
    }
@@ -104,6 +131,9 @@ if(isset($_POST["action"]))
   if(!file_exists($_POST["folder_name"])) 
   {
    mkdir($_POST["folder_name"], 0777, true);
+   $folderName = $_POST["folder_name"];
+   $folderDate = $_POST["folder_date"];
+   $Create_Folder = mysqli_query($con,"INSERT INTO docfolder(doc_name, doc_date) VALUES ('$folderName','$folderDate')");
    echo 'Folder Created';
   }
   else
@@ -115,7 +145,11 @@ if(isset($_POST["action"]))
  {
   if(!file_exists($_POST["folder_name"]))
   {
+   $renameOldName = $_POST["old_name"];
+   $renameNewName = $_POST['folder_name'];
+   $Rename_Folder = mysqli_query($con,"UPDATE docfolder SET doc_name='$renameNewName' WHERE doc_name='$renameOldName'");
    rename($_POST["old_name"], $_POST["folder_name"]);
+   
    echo 'Folder Name Change';
   }
   else
@@ -127,6 +161,7 @@ if(isset($_POST["action"]))
  if($_POST["action"] == "delete")
  {
   $files = scandir($_POST["folder_name"]);
+  $delFiles = $_POST["folder_name"];
   foreach($files as $file)
   {
    if($file === '.' or $file === '..')
@@ -140,6 +175,7 @@ if(isset($_POST["action"]))
   }
   if(rmdir($_POST["folder_name"]))
   {
+    $query_delFolder = mysqli_query($con,"DELETE FROM docfolder WHERE doc_name = '$delFiles'");
    echo 'Folder Deleted';
   }
  }
@@ -149,7 +185,7 @@ if(isset($_POST["action"]))
   $file_data = scandir($_POST["folder_name"]);
   $output = '<form action="merge.php">
   <input type="hidden" name="folderName" value="'.$_POST['folder_name'].'"/>
-  <button type="submit">Merge All File</button>
+  <button type="submit" >Merge All File</button>
   </form>
   <table class="table table-bordered table-striped">
    <tr>
@@ -175,7 +211,7 @@ if(isset($_POST["action"]))
     
      <td>'.date ("h:i:sa d/m/y", filemtime($path)).'</td>
      <td data-folder_name="'.$_POST["folder_name"].'"  data-file_name = "'.$file.'" class="change_file_name">'.$file.'</td>
-     <td><a class="btn btn-primary btn-xs" href="'.$path.'">Download</a></td>
+     <td><a class="btn btn-primary btn-xs" href="'.$path.'" target="_blank">Download</a></td>
      <td><button name="remove_file" class="remove_file btn btn-danger btn-xs" id="'.$path.'">Remove</button></td>
     </tr>
     ';

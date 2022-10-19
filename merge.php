@@ -56,6 +56,6 @@ $Outputpdf->merge();
 //F: The output will save the file to a particular path.
 //We select the default I to run the output on the browser.
 
-$Outputpdf->Output('I', 'Merged PDF.pdf');
+$Outputpdf->Output('D', 'Merged PDF.pdf');
 
 ?>
