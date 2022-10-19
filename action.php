@@ -80,22 +80,22 @@ if(isset($_POST["action"]))
     $Select_Folder = mysqli_query($con,"SELECT * FROM docfolder WHERE doc_name = '$name'");
     $num_rows = mysqli_num_rows($Select_Folder);
     $ResultFolder = "";
-    if($num_rows>0){
-        $Result_Folder = mysqli_fetch_array($Select_Folder);
-        $ResultFolder = $Result_Folder['doc_date'];
-        
-        
-    }else{
-        $ResultFolder = "";
-    }
     $time = date("Y-m-d");
     $colorTR = "";
     $disabledTr = "";
+    if($num_rows>0){
+        $Result_Folder = mysqli_fetch_array($Select_Folder);
+        $ResultFolder = $Result_Folder['doc_date'];
+        if($time >= $Result_Folder['doc_date']){ 
+            $colorTR = "class='bg-danger'"; 
+            $disabledTr = "disabled";
+        };
+    }else{
+        $ResultFolder = "";
+    }
+    
     //if($time == $Result_Folder['doc_date']){ echo "test"; };
-    if($time >= $Result_Folder['doc_date']){ 
-        $colorTR = "class='bg-danger'"; 
-        $disabledTr = "disabled";
-    };
+    
    
    
     
